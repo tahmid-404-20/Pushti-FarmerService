@@ -4,24 +4,32 @@ const axios = require("axios");
 
 const loanMsUrl = process.env.loanMsUrl;
 
-router.get("/", async (req, res) => {
-  const historyUrl = loanMsUrl + "loan_history/farmer";
-
-  const req_data = { farmer_id: req.user.id, page: 0 };
-
+async function getLoanMsUrl() {
   try {
-    const response = await axios.post(historyUrl, req_data);
-    res.status(200).json(response.data);
+    let serviceRegisterUrl =
+      String(process.env.serviceRegistryUrl) + "/get-service";
+    response = await axios.post(serviceRegisterUrl, {
+      name: process.env.loanMsName,
+    });
+    // console.log(response.data);
+
+    if (response.data.success) {
+      return response.data.url;
+    } else {
+      console.log(response.data.message);
+      return null;
+    }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error recovering location-data", error);
+    return null;
   }
-});
+}
 
 router.post("/", async (req, res) => {
+  const loanMsUrl = await getLoanMsUrl();
   const historyUrl = loanMsUrl + "loan_history/farmer";
 
-  const req_data = { farmer_id: req.user.id, page: req.body.page };
+  const req_data = { farmer_id: req.body.id, page: req.body.page };
 
   try {
     const response = await axios.post(historyUrl, req_data);
@@ -33,6 +41,7 @@ router.post("/", async (req, res) => {
 });
 
 router.post("/request", async (req, res) => {
+  const loanMsUrl = await getLoanMsUrl();
   const requestUrl = loanMsUrl + "loan_request/farmer";
 
   // const { farmer_id, agent_id, min, max, description } = req.body;
@@ -40,12 +49,12 @@ router.post("/request", async (req, res) => {
   //   get agent_id
   let data = await supabase.any(
     `SELECT "agentId" FROM "Farmer" where id = $1`,
-    [req.user.id]
+    [req.body.id]
   );
   const agent_id = data[0].agentId;
 
   const req_data = {
-    farmer_id: req.user.id,
+    farmer_id: req.body.id,
     agent_id: agent_id,
     min: req.body.min,
     max: req.body.max,
