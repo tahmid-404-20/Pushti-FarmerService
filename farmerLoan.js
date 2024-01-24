@@ -27,7 +27,7 @@ async function getLoanMsUrl() {
 
 router.post("/", async (req, res) => {
   const loanMsUrl = await getLoanMsUrl();
-  const historyUrl = loanMsUrl + "loan_history/farmer";
+  const historyUrl = loanMsUrl + "/loan_history/farmer";
 
   const req_data = { farmer_id: req.body.id, page: req.body.page };
 
@@ -42,7 +42,7 @@ router.post("/", async (req, res) => {
 
 router.post("/request", async (req, res) => {
   const loanMsUrl = await getLoanMsUrl();
-  const requestUrl = loanMsUrl + "loan_request/farmer";
+  const requestUrl = loanMsUrl + "/loan_request/farmer";
 
   // const { farmer_id, agent_id, min, max, description } = req.body;
 
