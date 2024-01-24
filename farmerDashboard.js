@@ -17,20 +17,20 @@ async function processSellHistoryData(sellHistoryData) {
     "Dec",
   ];
 
-  sellHistoryData.month = monthName[sellHistoryData.month_no - 1];
+  for(let i = 0; i < sellHistoryData.length; i++) {
+    sellHistoryData[i].month = monthName[sellHistoryData[i].month_no - 1];
+    sellHistoryData[i].amount =
+      parseFloat(sellHistoryData[i].total) -
+      parseFloat(sellHistoryData[i].totaldeduction) -
+      parseFloat(sellHistoryData[i].taxamount) +
+      parseFloat(sellHistoryData[i].totalcashback);
 
-  // compute total payable amount
-  sellHistoryData.amount =
-    parseFloat(sellHistoryData.total) -
-    parseFloat(sellHistoryData.totaldeduction) -
-    parseFloat(sellHistoryData.taxamount) +
-    parseFloat(sellHistoryData.totalcashback);
-
-  delete sellHistoryData.month_no;
-  delete sellHistoryData.total;
-  delete sellHistoryData.totaldeduction;
-  delete sellHistoryData.totalcashback;
-  delete sellHistoryData.taxamount;
+    delete sellHistoryData[i].month_no;
+    delete sellHistoryData[i].total;
+    delete sellHistoryData[i].totaldeduction;
+    delete sellHistoryData[i].totalcashback;
+    delete sellHistoryData[i].taxamount;
+  }
 
   return sellHistoryData;
 }
@@ -61,7 +61,9 @@ router.post("/", async (req, res) => {
     [req.body.id]
   );
 
-  let sellHistoryOneYear = await processSellHistoryData(sellHistoryData[0]);
+  console.log(sellHistoryData);
+
+  let sellHistoryOneYear = await processSellHistoryData(sellHistoryData);
   const responseObj = { basicData, rankandpoint, sellHistoryOneYear };
 
   res.status(200).json(responseObj);
