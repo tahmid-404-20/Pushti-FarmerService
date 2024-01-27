@@ -17,7 +17,7 @@ async function processSellHistoryData(sellHistoryData) {
     "Dec",
   ];
 
-  for(let i = 0; i < sellHistoryData.length; i++) {
+  for (let i = 0; i < sellHistoryData.length; i++) {
     sellHistoryData[i].month = monthName[sellHistoryData[i].month_no - 1];
     sellHistoryData[i].amount =
       parseFloat(sellHistoryData[i].total) -
@@ -36,6 +36,7 @@ async function processSellHistoryData(sellHistoryData) {
 }
 
 router.post("/", async (req, res) => {
+  console.log("Holla bro");
   let response = await supabase.any(
     `SELECT "name", "nid", "email", "phone", "avatarLink", "permanentAddress",  "dob",  (SELECT "name" AS "unionName" FROM "UnionParishad" where "UnionParishad"."id" = "unionId"), \
         (SELECT "name" AS "agentName" FROM "User" where "id" = (SELECT "agentId" FROM "Farmer" where "Farmer"."id" = $1)) \
@@ -43,10 +44,12 @@ router.post("/", async (req, res) => {
     [req.body.id]
   );
   const basicData = response[0];
-  let rankandpoint = await supabase.any(
+  let rankandpointArray = await supabase.any(
     `SELECT "rank", "points" FROM "Farmer" where "Farmer"."id" = $1;`,
     [req.body.id]
-  )[0];
+  );
+
+  let rankandpoint = rankandpointArray[0];
 
   // populate data table for next rank point point reaching
   let rankTable = await supabase.any(
@@ -65,6 +68,8 @@ router.post("/", async (req, res) => {
 
   let sellHistoryOneYear = await processSellHistoryData(sellHistoryData);
   const responseObj = { basicData, rankandpoint, sellHistoryOneYear };
+
+  console.log(responseObj);
 
   res.status(200).json(responseObj);
 });
