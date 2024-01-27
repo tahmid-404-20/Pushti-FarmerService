@@ -17,22 +17,88 @@ async function processSellHistoryData(sellHistoryData) {
     "Dec",
   ];
 
-  for (let i = 0; i < sellHistoryData.length; i++) {
-    sellHistoryData[i].month = monthName[sellHistoryData[i].month_no - 1];
-    sellHistoryData[i].amount =
-      parseFloat(sellHistoryData[i].total) -
-      parseFloat(sellHistoryData[i].totaldeduction) -
-      parseFloat(sellHistoryData[i].taxamount) +
-      parseFloat(sellHistoryData[i].totalcashback);
+  // now we have to fill the missing month in sorted order for the last 12 months,
+  // check the system date, and fill the missing month and add 0 to the amount
+  // append the year also. for example Feb-24, Jan-24, Dec-23, .... Mar-23 (if the current month is February 2024)
 
-    delete sellHistoryData[i].month_no;
-    delete sellHistoryData[i].total;
-    delete sellHistoryData[i].totaldeduction;
-    delete sellHistoryData[i].totalcashback;
-    delete sellHistoryData[i].taxamount;
+  // first sort the array
+  sellHistoryData.sort((a, b) => {
+    return a.month_no - b.month_no;
+  });
+
+  // now fill the missing month
+  let currentMonth = new Date().getMonth() + 1;
+  let currentYear = new Date().getFullYear();
+
+  let monthYears = [];
+  let last12Months = [];
+  for (let i = 0; i < 12; i++) {
+    last12Months.push(currentMonth);
+    monthYears.push(currentYear);
+    currentMonth--;
+    if (currentMonth == 0) {
+      currentMonth = 12;
+      currentYear--;
+    }
   }
 
-  return sellHistoryData;
+  // now we have the last 12 months in sorted order
+  // now we have to check if there is any missing month in the sellHistoryData
+  // if there is any missing month, then we have to add that month with 0 amount
+
+  //  now iterate through the sellHistoryData following the last12Months array, and add a field named amount as well as month name (Jan-24, Feb-24, Mar-24, ....)
+
+  let last12MonthsIndex = 0;
+  let last12MonthsLength = last12Months.length;
+
+  // sellHistoryDataReturned is the array that will be returned, it will contain the last 12 months data
+
+  let sellHistoryDataReturned = [];
+
+  for (
+    last12MonthsIndex = 0;
+    last12MonthsIndex < last12MonthsLength;
+    last12MonthsIndex++
+  ) {
+    let month_no = last12Months[last12MonthsIndex];
+
+    // check if the month_no is present in the sellHistoryData, if present, find the index and add the amount and month name with year in the sellHistoryDataReturned array
+    // if not present, add the month_no with 0 amount
+
+    let found = false;
+    for (
+      let sellHistoryDataIndex = 0;
+      sellHistoryDataIndex < sellHistoryData.length;
+      sellHistoryDataIndex++
+    ) {
+      if (sellHistoryData[sellHistoryDataIndex].month_no == month_no) {
+        // month_no is present in the sellHistoryData
+        found = true;
+        sellHistoryDataReturned.push({
+          month: monthName[month_no - 1] + "-" + monthYears[last12MonthsIndex].toString().slice(2),
+          amount:
+            parseFloat(sellHistoryData[sellHistoryDataIndex].total) -
+            parseFloat(sellHistoryData[sellHistoryDataIndex].totaldeduction) -
+            parseFloat(sellHistoryData[sellHistoryDataIndex].taxamount) +
+            parseFloat(sellHistoryData[sellHistoryDataIndex].totalcashback),
+        });
+        break;
+      }
+    }
+
+    // if the month_no is not present in the sellHistoryData, add the month_no with 0 amount
+    if (!found) {
+      sellHistoryDataReturned.push({
+        month: monthName[month_no - 1] + "-" + monthYears[last12MonthsIndex].toString().slice(2),
+        amount: 0,
+      });
+    }
+  }
+
+  // reverse the sellHistoryDataReturned array
+  sellHistoryDataReturned.reverse();
+
+  return sellHistoryDataReturned;
 }
 
 router.post("/", async (req, res) => {
