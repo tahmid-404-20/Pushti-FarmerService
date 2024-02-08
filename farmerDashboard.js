@@ -125,7 +125,7 @@ router.post("/", async (req, res) => {
   let sellHistoryData = await supabase.any(
     `SELECT EXTRACT('MONTH' FROM "timestamp") AS month_no, SUM("totalTax") as taxAmount, SUM("total") as total, SUM("totalDeduction") as totalDeduction, SUM("cashback") as totalCashback\
         FROM "FarmerBuy" \
-        where "farmerId" = $1 and "timestamp" > NOW() - INTERVAL '1 year'\
+        where "farmerId" = $1 and "status" = 'approved' and "timestamp" > NOW() - INTERVAL '1 year'\
         GROUP BY EXTRACT('MONTH' FROM "timestamp");`,
     [req.body.id]
   );

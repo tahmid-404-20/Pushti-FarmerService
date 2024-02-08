@@ -46,6 +46,9 @@ router.post("/request", async (req, res) => {
 
   // const { farmer_id, agent_id, min, max, description } = req.body;
 
+  console.log(req.body);
+  console.log(requestUrl);
+
   //   get agent_id
   let data = await supabase.any(
     `SELECT "agentId" FROM "Farmer" where id = $1`,
@@ -60,6 +63,8 @@ router.post("/request", async (req, res) => {
     max: req.body.max,
     description: req.body.description,
   };
+
+  console.log(req_data);
 
   try {
     const response = await axios.post(requestUrl, req_data);
