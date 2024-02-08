@@ -119,8 +119,13 @@ router.post("/", async (req, res) => {
 
   // populate data table for next rank point point reaching
   let rankTable = await supabase.any(
-    `SELECT "className", "max", "min" FROM "Rank"`
+    `SELECT "className", "max", "min", "nextRank" FROM "Rank" where "Rank"."className" = $1`,
+    [rankandpoint.rank]
   );
+
+  rankandpoint.minPoint = rankTable[0].min;
+  rankandpoint.maxPoint = rankTable[0].max;
+  rankandpoint.nextRank = rankTable[0].nextRank;
 
   let sellHistoryData = await supabase.any(
     `SELECT EXTRACT('MONTH' FROM "timestamp") AS month_no, SUM("totalTax") as taxAmount, SUM("total") as total, SUM("totalDeduction") as totalDeduction, SUM("cashback") as totalCashback\
