@@ -13,7 +13,7 @@ const dashboardRouter = require("./farmerDashboard");
 
 app.use("/loan", loanRouter);
 app.use("/dashboard", dashboardRouter);
-app.use("/transactions", require("./farmerTransactions"));
+app.use("/buy", require("./farmerTransactions"));
 
 
 app.listen(PORT, async () => {

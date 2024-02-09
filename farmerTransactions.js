@@ -23,7 +23,7 @@ async function getBuyMsUrl() {
     }
 }
 
-router.post("/", async (req, res) => {
+router.post("/history", async (req, res) => {
     const buyMsUrl = await getBuyMsUrl();
     const historyUrl = buyMsUrl + "/buy-history/farmer";
 
