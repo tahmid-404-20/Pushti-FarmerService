@@ -10,10 +10,12 @@ app.use(cors({ origin: "*" }));
 
 const loanRouter = require("./farmerLoan");
 const dashboardRouter = require("./farmerDashboard");
+const leaderboardRouter = require("./farmerLeaderboard");
 
 app.use("/loan", loanRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/buy", require("./farmerTransactions"));
+app.use("/leaderboard", leaderboardRouter);
 
 
 app.listen(PORT, async () => {
